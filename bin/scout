@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# Default values
+path="."
+extension=""
+filter=""
+limit="none"
+ignore_dirs=(".git" ".idea")  # Add more directories to ignore here
+
+# Color codes
+CYAN='\033[0;36m'
+GRAY='\033[0;37m'
+NC='\033[0m'
+
+# Parse input arguments
+while getopts "p:e:f:l:" opt; do
+  case ${opt} in
+    p ) path=$OPTARG ;;
+    e ) extension=$OPTARG ;;
+    f ) filter=$OPTARG ;;
+    l ) limit=$OPTARG ;;
+    \? ) echo "Usage: cmd [-p path] [-e extension] [-f filter] [-l limit]" ;;
+  esac
+done
+
+# Function to recursively find and display files based on parameters
+scout_files() {
+    local ext=$1
+    local grep_filter=$2
+    local search_path=$3
+    local limit=$4
+    local find_ignore=""
+
+    # Build the ignore pattern for find command
+    for dir in "${ignore_dirs[@]}"; do
+        find_ignore="$find_ignore -path $search_path/$dir -prune -o"
+    done
+
+    # Run the find command with adjusted ignoring of directories and file search
+    if [ -n "$ext" ]; then
+        eval find "$search_path" $find_ignore -type f -name "*.$ext" -print | while read -r file; do
+            if [ -z "$grep_filter" ]; then
+                echo -e "${CYAN}File: $file${NC}"
+                echo -e "${GRAY}$(cat "$file")${NC}"
+            else
+                if grep -q "$grep_filter" "$file"; then
+                    echo -e "${CYAN}File: $file${NC}"
+                    if [ "$limit" == "none" ]; then
+                        echo -e "${GRAY}$(grep --color=never "$grep_filter" "$file")${NC}"
+                    else
+                        echo -e "${GRAY}$(grep -C 5 --color=never "$grep_filter" "$file")${NC}"
+                    fi
+                fi
+            fi
+        done
+    else
+        eval find "$search_path" $find_ignore -type f -print | while read -r file; do
+            if [ -z "$grep_filter" ]; then
+                echo -e "${CYAN}File: $file${NC}"
+                echo -e "${GRAY}$(cat "$file")${NC}"
+            else
+                if grep -q "$grep_filter" "$file"; then
+                    echo -e "${CYAN}File: $file${NC}"
+                    if [ "$limit" == "none" ]; then
+                        echo -e "${GRAY}$(grep --color=never "$grep_filter" "$file")${NC}"
+                    else
+                        echo -e "${GRAY}$(grep -C 5 --color=never "$grep_filter" "$file")${NC}"
+                    fi
+                fi
+            fi
+        done
+    fi
+}
+
+
+# Run the file search
+scout_files "$extension" "$filter" "$path" "$limit"

@@ -1,0 +1,40 @@
+name: Scout CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Install dependencies (Bats testing framework)
+      - name: Install bats-core
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats
+
+      # Build or install scout
+      - name: Build Scout
+        run: |
+          # Assuming scout is in the bin folder and you want to move it to /usr/local/bin
+          chmod +x bin/scout
+          sudo mv bin/scout /usr/local/bin/scout
+
+      # Verify scout is installed
+      - name: Check scout command
+        run: |
+          scout --help  # Or any basic command to verify it's recognized
+
+      # Run the tests
+      - name: Run Scout tests
+        run: bats tests/scout.bats
