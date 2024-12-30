@@ -5,7 +5,7 @@ path="."
 extension=""
 filter=""
 limit="none"
-ignore_dirs=(".git" ".idea" ".venv")  # Add more directories to ignore here
+ignore_dirs=(".git" ".idea" ".venv" "__pycache__" ".pytest_cache")  # Add more directories to ignore here
 
 # Color codes
 CYAN='\033[0;36m'
