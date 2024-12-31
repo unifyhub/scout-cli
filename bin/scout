@@ -1,11 +1,54 @@
 #!/bin/bash
-
 # Default values
 path="."
 extension=""
 filter=""
 limit="none"
-ignore_dirs=(".git" ".idea" ".venv" "__pycache__" ".pytest_cache")  # Add more directories to ignore here
+
+# Expanded list of common generated directories to ignore
+ignore_dirs=(
+    # Python
+    "__pycache__" 
+    "*.egg-info"
+    ".pytest_cache"
+    ".coverage"
+    ".tox"
+    ".mypy_cache"
+    
+    # Node/JavaScript
+    "node_modules"
+    "dist"
+    "build"
+    
+    # Java/Kotlin
+    "target"
+    "build"
+    ".gradle"
+    
+    # IDE specific
+    ".idea"
+    ".vscode"
+    ".vs"
+    
+    # Version Control
+    ".git"
+    ".svn"
+    
+    # Virtual Environments
+    "venv"
+    ".venv"
+    "env"
+    ".env"
+    ".virtualenv"
+    
+    # Other build/cache directories
+    ".cache"
+    ".next"
+    ".nuxt"
+    "out"
+    "tmp"
+    ".tmp"
+)
 
 # Color codes
 CYAN='\033[0;36m'
@@ -31,9 +74,9 @@ scout_files() {
     local limit=$4
     local find_ignore=""
 
-    # Build the ignore pattern for find command
+    # Build the ignore pattern for find command using wildcard matching
     for dir in "${ignore_dirs[@]}"; do
-        find_ignore="$find_ignore -path $search_path/$dir -prune -o"
+        find_ignore="$find_ignore -path '*/$dir/*' -prune -o -path '*/$dir' -prune -o"
     done
 
     # Run the find command with adjusted ignoring of directories and file search
@@ -71,7 +114,6 @@ scout_files() {
         done
     fi
 }
-
 
 # Run the file search
 scout_files "$extension" "$filter" "$path" "$limit"
